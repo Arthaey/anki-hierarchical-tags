@@ -7,6 +7,11 @@ This addon adds hierarchical tags to the browser in [Anki][]. The addon is
 To create hierarchies use double-colons in the tag names, for example
 "learning::anki" or "language::japanese".
 
+This addon also makes a new field available: `{{LeafTags}``, which is like
+the built-in [{{Tags}}](http://ankisrs.net/docs/manual.html#special-fields)
+except that it only displays that last portion of hierarchical tags. For
+example, the tag "language::japanese" would appear as just "japanese".
+
 This addon is licensed under the same license as Anki itself (GNU Affero
 General Public License 3).
 
