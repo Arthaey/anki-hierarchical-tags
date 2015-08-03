@@ -111,6 +111,7 @@ def _populate_field():
     for nid in _progress(nids, _(u"Adding leaf tags"), _(u"Stop")):
         note = mw.col.getNote(nid)
         note[LEAF_TAGS_NAME] = _format_tags(note.tags, _leafify_tag)
+        note.flush()
 
     mw.reset()
 
