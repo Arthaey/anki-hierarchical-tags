@@ -7,13 +7,31 @@ This addon adds hierarchical tags to the browser in [Anki][]. The addon is
 To create hierarchies use double-colons in the tag names, for example
 "learning::anki" or "language::japanese".
 
+This addon is licensed under the same license as Anki itself (GNU Affero
+General Public License 3).
+
+## LeafTags
+
 This addon also makes a new field available: `{{LeafTags}`, which is like
 the built-in [{{Tags}}](http://ankisrs.net/docs/manual.html#special-fields)
 except that it only displays that last portion of hierarchical tags. For
 example, the tag "language::japanese" would appear as just "japanese".
 
-This addon is licensed under the same license as Anki itself (GNU Affero
-General Public License 3).
+If you edit the addon's source code, you can control the name of this tag via
+the constant `LEAF_TAGS_NAME`.
+
+You can also control whether leaf tags are dynamically created or stored in a
+new "LeafTags" field via the constant `SAVE_LEAF_TAGS_TO_FIELD`.
+
+When `False`, leaf tags will be generated dynamically when you view cards
+with the desktop version of Anki. It will display "{unknown field LeafTags}"
+on AnkiWeb and mobile applications.
+
+When `True`, a new "LeafTags" field will be added to the end of every model, and
+its value will be updated when you change the tags on a note.
+
+If `ADD_LEAF_TAGS_TO_TEMPLATES` is `True`, it will also add the leaf tags to the
+bottom of each note type's templates.
 
 
 ## Known Issues
