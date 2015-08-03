@@ -28,7 +28,8 @@ SAVE_LEAF_TAGS_TO_FIELD = True
 
 ADD_LEAF_TAGS_TO_TEMPLATES = True
 
-LEAF_TAGS_TEMPLATE = "<div class='tags'>tags: {0}</div>".format(LEAF_TAGS_NAME)
+# Have to escape a single literal "{" as "{{". So many braces...
+LEAF_TAGS_TEMPLATE = "\n\n<div class=\"tags\">tags: {{{{{0}}}}}</div>".format(LEAF_TAGS_NAME)
 
 LOGGER = TimedLog() # DELETE
 
@@ -94,10 +95,11 @@ def _add_field_to_templates(templates):
 
 def _add_field_to_all_templates():
     mm = mw.col.models
-    templates = sum([ model["tmpls"] for model in mm ], []) # flatten
+    templates = sum([ model["tmpls"] for model in mm.all() ], []) # flatten
     _add_field_to_templates(templates)
     mm.save(templates=True)
     mm.flush()
+    showInfo("Templates updated.")
 
 def _populate_field():
     mm = mw.col.models
