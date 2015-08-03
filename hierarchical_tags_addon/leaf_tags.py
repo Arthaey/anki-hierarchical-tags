@@ -4,34 +4,30 @@ import re
 from PyQt4.QtCore import QCoreApplication, SIGNAL
 from PyQt4.QtGui import QAction, QProgressDialog
 
-from anki.hooks import addHook
+from anki.hooks import addHook, wrap
 from anki.lang import _
+from anki.tags import TagManager
 from anki.template import template
-from anki.utils import TimedLog # DELETE
 from aqt import mw
+from aqt.addcards import AddCards
+from aqt.browser import Browser
+from aqt.editcurrent import EditCurrent
 from aqt.utils import showInfo
 
 from hierarchical_tags import SEPARATOR
 
 LEAF_TAGS_NAME = "LeafTags"
 
-LEAF_TAG_RE = r"(?:{0})?([^{1}]+?$)".format(SEPARATOR, SEPARATOR[0])
-
-# When False, {{LeafTags}} will be generated dynamically when you view cards
-# with the desktop version of Anki. It will display "{unknown field LeafTags}"
-# on AnkiWeb and mobile applications.
-#
-# When True, a new LeafTags field will be added to the end of every model, and
-# its value will be updated when you change the tags on a note.
-#
-SAVE_LEAF_TAGS_TO_FIELD = True
-
-ADD_LEAF_TAGS_TO_TEMPLATES = True
-
 # Have to escape a single literal "{" as "{{". So many braces...
 LEAF_TAGS_TEMPLATE = "\n\n<div class=\"tags\">tags: {{{{{0}}}}}</div>".format(LEAF_TAGS_NAME)
 
-LOGGER = TimedLog() # DELETE
+# Whether to append the leaf tags to all models' templates.
+ADD_LEAF_TAGS_TO_TEMPLATES = True
+
+# Whether to save processed leaf tags to the note, or generate dynamically.
+SAVE_LEAF_TAGS_TO_FIELD = True
+
+LEAF_TAG_RE = r"(?:{0})?([^{1}]+?$)".format(SEPARATOR, SEPARATOR[0])
 
 def _onTagsUpdated(note):
     model = note.model()
@@ -41,17 +37,19 @@ def _onTagsUpdated(note):
     if not LEAF_TAGS_NAME in mm.fieldNames(model):
         showInfo("Adding {0} field to note type {1}".format(LEAF_TAGS_NAME, model["name"]))
         _add_field_to_model(mm, model)
-        LOGGER.log(mm.fieldNames(model)) # DELETE
 
     # Set field based on updated tags.
-    LOGGER.log(mm.fieldNames(note.model())) # DELETE
+    #_populate_field(note.id)
     note[LEAF_TAGS_NAME] = _format_tags(note.tags, _leafify_tag)
     note.flush()
 
-    # TODO: Redraw browser/addcard UI.
-    browser = mw.app.activeWindow()
-    browser.editor.setNote(browser.card.note(reload=True))
-    browser.editor.card = browser.card
+    # Redraw card UI.
+    window = mw.app.activeWindow()
+    if isinstance(window, AddCards) or isinstance(window, EditCurrent):
+        window.editor.setNote(note, focus=True)
+    if isinstance(window, Browser):
+        window.editor.setNote(window.card.note(reload=True))
+        window.editor.card = window.card
 
 def _my_get_or_attr(obj, name, default=None):
     # Intercept and dynamically generate leaf tags.
@@ -101,20 +99,29 @@ def _add_field_to_all_templates():
     mm.flush()
     showInfo("Templates updated.")
 
-def _populate_field():
+def _populate_fields_for_all_cards():
     mm = mw.col.models
     models = mm.all()
     nids = []
+
     for model in models:
         if not LEAF_TAGS_NAME in mm.fieldNames(model):
             _add_field_to_model(mm, model)
         nids.extend(mm.nids(model))
 
     for nid in _progress(nids, _(u"Adding leaf tags"), _(u"Stop")):
-        note = mw.col.getNote(nid)
-        note[LEAF_TAGS_NAME] = _format_tags(note.tags, _leafify_tag)
-        note.flush()
+        _populate_field(nid)
 
+    mw.reset()
+
+def _populate_field(nid):
+    note = mw.col.getNote(nid)
+    note[LEAF_TAGS_NAME] = _format_tags(note.tags, _leafify_tag)
+    note.flush()
+
+def _bulkAdd(self, ids, tags, add=True):
+    for nid in ids:
+        _populate_field(nid)
     mw.reset()
 
 def _progress(data, *args):
@@ -133,17 +140,19 @@ def _progress(data, *args):
         widget.setValue(c)
         yield(v)
 
+def _add_menu_item(textTemplate, func):
+    action = QAction(textTemplate.format(LEAF_TAGS_NAME), mw)
+    mw.connect(action, SIGNAL("triggered()"), func)
+    mw.form.menuTools.addAction(action)
+
 
 if ADD_LEAF_TAGS_TO_TEMPLATES:
-    action = QAction("Add {0} to templates".format(LEAF_TAGS_NAME), mw)
-    mw.connect(action, SIGNAL("triggered()"), _add_field_to_all_templates)
-    mw.form.menuTools.addAction(action)
+    _add_menu_item("Add {0} to templates", _add_field_to_all_templates)
 
 if SAVE_LEAF_TAGS_TO_FIELD:
     addHook("tagsUpdated", _onTagsUpdated)
-    action = QAction("Update {0} fields".format(LEAF_TAGS_NAME), mw)
-    mw.connect(action, SIGNAL("triggered()"), _populate_field)
-    mw.form.menuTools.addAction(action)
+    TagManager.bulkAdd = wrap(TagManager.bulkAdd, _bulkAdd, "after")
+    _add_menu_item("Update {0} fields", _populate_fields_for_all_cards)
 else:
     original_get_or_attr = template.get_or_attr
     template.get_or_attr = _my_get_or_attr
