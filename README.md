@@ -17,6 +17,8 @@ the built-in [{{Tags}}](http://ankisrs.net/docs/manual.html#special-fields)
 except that it only displays that last portion of hierarchical tags. For
 example, the tag "language::japanese" would appear as just "japanese".
 
+It ignores "marked" and "leech" tags.
+
 ### Configuration
 
 If you edit the addon's source code, you can control the name of this tag via

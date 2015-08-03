@@ -66,7 +66,8 @@ def _my_get_or_attr(obj, name, default=None):
 
 
 def _format_tags(tags, format_func):
-    return " ".join([ format_func(tag) for tag in tags ])
+    ignore = [ "marked", "leech" ]
+    return " ".join([ format_func(tag) for tag in tags if not tag in ignore ])
 
 
 def _to_html(tag):
