@@ -17,21 +17,23 @@ the built-in [{{Tags}}](http://ankisrs.net/docs/manual.html#special-fields)
 except that it only displays that last portion of hierarchical tags. For
 example, the tag "language::japanese" would appear as just "japanese".
 
+### Configuration
+
 If you edit the addon's source code, you can control the name of this tag via
 the constant `LEAF_TAGS_NAME`.
 
-You can also control whether leaf tags are dynamically created or stored in a
-new "LeafTags" field via the constant `SAVE_LEAF_TAGS_TO_FIELD`.
+- `LEAF_TAGS_NAME`: defaults to `{{LeafTags}}`
+- `SAVE_LEAF_TAGS_TO_FIELD`: whether to save processed leaf tags to the note, or generate dynamically
+- `WRAP_TAGS_IN_HTML`: whether the individual tags should be returned as "tag" or wrapped in a &gt;span&lt; (for both saved fields and dynamically generated values)
+- `ADD_LEAF_TAGS_TO_TEMPLATES`: whether to append the leaf tags to all models' templates.
+- `LEAF_TAGS_TEMPLATE`: the HTML appended to model templates
 
-When `False`, leaf tags will be generated dynamically when you view cards
-with the desktop version of Anki. It will display "{unknown field LeafTags}"
-on AnkiWeb and mobile applications.
+When `SAVE_LEAF_TAGS_TO_FIELD` is `False`, leaf tags will be generated
+dynamically when you view cards with the desktop version of Anki. It will
+display "{unknown field LeafTags}" on AnkiWeb and mobile applications.
 
 When `True`, a new "LeafTags" field will be added to the end of every model, and
 its value will be updated when you change the tags on a note.
-
-If `ADD_LEAF_TAGS_TO_TEMPLATES` is `True`, it will also add the leaf tags to the
-bottom of each note type's templates.
 
 
 ## Known Issues

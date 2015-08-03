@@ -24,6 +24,9 @@ LEAF_TAGS_TEMPLATE = u"\n\n<div class=\"tags\">tags: {{{{{0}}}}}</div>".format(L
 # Whether to append the leaf tags to all models' templates.
 ADD_LEAF_TAGS_TO_TEMPLATES = True
 
+# Whether the tags should be returned as "tag" or wrapped in a <span>.
+WRAP_TAGS_IN_HTML = True
+
 # Whether to save processed leaf tags to the note, or generate dynamically.
 SAVE_LEAF_TAGS_TO_FIELD = True
 
@@ -40,7 +43,8 @@ def _onTagsUpdated(note):
 
     # Set field based on updated tags.
     #_populate_field(note.id)
-    note[LEAF_TAGS_NAME] = _format_tags(note.tags, _leafify_tag)
+    format_func = _to_html if WRAP_TAGS_IN_HTML else _leafify_tag
+    note[LEAF_TAGS_NAME] = _format_tags(note.tags, format_func)
     note.flush()
 
     # Redraw card UI.
@@ -116,7 +120,8 @@ def _populate_fields_for_all_cards():
 
 def _populate_field(nid):
     note = mw.col.getNote(nid)
-    note[LEAF_TAGS_NAME] = _format_tags(note.tags, _leafify_tag)
+    format_func = _to_html if WRAP_TAGS_IN_HTML else _leafify_tag
+    note[LEAF_TAGS_NAME] = _format_tags(note.tags, format_func)
     note.flush()
 
 def _bulkAdd(self, ids, tags, add=True):
