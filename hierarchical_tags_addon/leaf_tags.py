@@ -16,10 +16,10 @@ from aqt.utils import showInfo
 
 from hierarchical_tags import SEPARATOR
 
-LEAF_TAGS_NAME = "LeafTags"
+LEAF_TAGS_NAME = u"LeafTags"
 
 # Have to escape a single literal "{" as "{{". So many braces...
-LEAF_TAGS_TEMPLATE = "\n\n<div class=\"tags\">tags: {{{{{0}}}}}</div>".format(LEAF_TAGS_NAME)
+LEAF_TAGS_TEMPLATE = u"\n\n<div class=\"tags\">tags: {{{{{0}}}}}</div>".format(LEAF_TAGS_NAME)
 
 # Whether to append the leaf tags to all models' templates.
 ADD_LEAF_TAGS_TO_TEMPLATES = True
@@ -35,7 +35,7 @@ def _onTagsUpdated(note):
     # Add field to the note's model, if necessary.
     mm = note.col.models
     if not LEAF_TAGS_NAME in mm.fieldNames(model):
-        showInfo("Adding {0} field to note type {1}".format(LEAF_TAGS_NAME, model["name"]))
+        showInfo(u"Adding {0} field to note type {1}".format(LEAF_TAGS_NAME, model["name"]))
         _add_field_to_model(mm, model)
 
     # Set field based on updated tags.
@@ -66,7 +66,7 @@ def _format_tags(tags, format_func):
 
 
 def _to_html(tag):
-    return "<span class='tag'>{0}</span>".format(_leafify_tag(tag))
+    return u"<span class='tag'>{0}</span>".format(_leafify_tag(tag))
 
 
 def _leafify_tag(tag):
@@ -147,12 +147,12 @@ def _add_menu_item(textTemplate, func):
 
 
 if ADD_LEAF_TAGS_TO_TEMPLATES:
-    _add_menu_item("Add {0} to templates", _add_field_to_all_templates)
+    _add_menu_item(u"Add {0} to templates", _add_field_to_all_templates)
 
 if SAVE_LEAF_TAGS_TO_FIELD:
     addHook("tagsUpdated", _onTagsUpdated)
     TagManager.bulkAdd = wrap(TagManager.bulkAdd, _bulkAdd, "after")
-    _add_menu_item("Update {0} fields", _populate_fields_for_all_cards)
+    _add_menu_item(u"Update {0} fields", _populate_fields_for_all_cards)
 else:
     original_get_or_attr = template.get_or_attr
     template.get_or_attr = _my_get_or_attr
