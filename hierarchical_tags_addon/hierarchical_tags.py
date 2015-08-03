@@ -1,9 +1,6 @@
-import re
-
 from aqt.browser import Browser
 from aqt.qt import QIcon
 from anki.hooks import wrap
-from anki.template import template
 
 
 # Separator used between hierarchies.
@@ -13,8 +10,6 @@ from anki.template import template
 #       work, but ":-" would not.
 #
 SEPARATOR = '::'
-
-LEAF_TAG_RE = r"(?:{0})?([^{1}]+?$)".format(SEPARATOR, SEPARATOR[0])
 
 
 def _userTagTree(self, root, _old):
@@ -43,24 +38,4 @@ def _userTagTree(self, root, _old):
                 tags_tree[partial_tag] = item
 
 
-def _my_get_or_attr(obj, name, default=None):
-    if name == "LeafTags":
-        tags_str = original_get_or_attr(obj, "Tags", default)
-        tags = tags_str.split(" ")
-        tags_html = [_format_tag(tag) for tag in tags]
-        return " ".join(tags_html)
-    else:
-        return original_get_or_attr(obj, name, default)
-
-
-def _format_tag(tag):
-    match = re.search(LEAF_TAG_RE, tag)
-    if match:
-        tag = match.group(1)
-    return "<span class='tag'>{0}</span>".format(tag)
-
-
 Browser._userTagTree = wrap(Browser._userTagTree, _userTagTree, 'around')
-
-original_get_or_attr = template.get_or_attr
-template.get_or_attr = _my_get_or_attr
