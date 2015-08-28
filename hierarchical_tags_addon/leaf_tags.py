@@ -27,6 +27,9 @@ ADD_LEAF_TAGS_TO_TEMPLATES = True
 # Whether the tags should be returned as "tag" or wrapped in a <span>.
 WRAP_TAGS_IN_HTML = True
 
+# Which tags to ignore for LeafTag purposes.
+IGNORE_TAGS_WITH_PREFIX = ["~",]
+
 # Whether to save processed leaf tags to the note, or generate dynamically.
 SAVE_LEAF_TAGS_TO_FIELD = True
 
@@ -66,8 +69,10 @@ def _my_get_or_attr(obj, name, default=None):
 
 
 def _format_tags(tags, format_func):
-    ignore = [ "marked", "leech" ]
-    return " ".join([ format_func(tag) for tag in tags if not tag in ignore ])
+    ignore = "^(marked|leech)$"
+    if len(IGNORE_TAGS_WITH_PREFIX):
+        ignore += "|" + "|^".join(IGNORE_TAGS_WITH_PREFIX)
+    return " ".join([ format_func(tag) for tag in tags if not re.match(ignore, tag) ])
 
 
 def _to_html(tag):

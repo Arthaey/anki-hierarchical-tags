@@ -28,6 +28,7 @@ the constant `LEAF_TAGS_NAME`.
 - `SAVE_LEAF_TAGS_TO_FIELD`: whether to save processed leaf tags to the note, or generate dynamically
 - `WRAP_TAGS_IN_HTML`: whether the individual tags should be returned as "tag" or wrapped in a &gt;span&lt; (for both saved fields and dynamically generated values)
 - `ADD_LEAF_TAGS_TO_TEMPLATES`: whether to append the leaf tags to all models' templates.
+- `IGNORE_TAGS_WITH_PREFIX`: which tags to ignore for LeafTag purposes (defaults to "~")
 - `LEAF_TAGS_TEMPLATE`: the HTML appended to model templates
 
 When `SAVE_LEAF_TAGS_TO_FIELD` is `False`, leaf tags will be generated
